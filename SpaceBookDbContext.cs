@@ -10,6 +10,7 @@ namespace SpaceBook
         public DbSet<SpaceObject>? SpaceObjects { get; set; }
         public DbSet<SpaceObjectContent>? SpaceObjectsContent { get; set; }
         public DbSet<UserGeneratedSpaceContent>? UsersGeneratedSpaceContent { get; set; }
+        public DbSet<Comment>? Comments { get; set; }
 
         public SpaceBookDbContext(DbContextOptions<SpaceBookDbContext> context) : base(context) { }
 
