@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Http.Json;
 using Microsoft.EntityFrameworkCore;
 using SpaceBook;
+using SpaceBook.Models;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -141,6 +142,58 @@ app.MapGet("/api/spacecontent/{id}", async (SpaceBookDbContext db, int id) =>
 
     return Results.Ok(spaceContent);
 });
+
+
+app.MapPost("/api/spacecontent/create", async (SpaceBookDbContext db, UserGeneratedSpaceContent userGeneratedSpaceContent) =>
+{
+    try
+    {
+        db.UsersGeneratedSpaceContent.Add(userGeneratedSpaceContent);
+        await db.SaveChangesAsync();
+
+        return Results.Ok("UserGeneratedSpaceContent created successfully.");
+    }
+    catch (Exception ex)
+    {
+        return Results.BadRequest(ex);
+    }
+});
+
+app.MapPut("/api/spacecontent/update/{id}", async (SpaceBookDbContext db, int id, UserGeneratedSpaceContent spaceContent) =>
+{
+    var contentToUpdate = await db.UsersGeneratedSpaceContent.FirstOrDefaultAsync(sc => sc.ContentId == id);
+
+    if (contentToUpdate == null)
+    {
+        return Results.NotFound();
+    }
+
+    contentToUpdate.Title = spaceContent.Title;
+    contentToUpdate.Description = spaceContent.Description;
+    contentToUpdate.Type = spaceContent.Type;
+    contentToUpdate.AssociatedSpaceObjects = spaceContent.AssociatedSpaceObjects;
+
+    await db.SaveChangesAsync();
+    return Results.Ok(contentToUpdate);
+
+});
+
+app.MapDelete("/api/spacecontent/delete/{id}", async (SpaceBookDbContext db, int id) =>
+{
+    var deleteContent = await db.UsersGeneratedSpaceContent.SingleOrDefaultAsync(sc => sc.ContentId == id);
+
+    if (deleteContent == null)
+    {
+        return Results.BadRequest();
+    }
+
+    db.Remove(deleteContent);
+    await db.SaveChangesAsync();
+    return Results.NoContent();
+});
+
+
+
 
 
 app.Run();
