@@ -81,10 +81,11 @@ app.MapGet("/api/checkuser/{uid}", (SpaceBookDbContext db, string uid) =>
     var userExists = db.Users.Where(x => x.UID == uid).FirstOrDefault();
     if (userExists == null)
     {
-        return Results.StatusCode(204);
+        return Results.NotFound("User not found");
     }
     return Results.Ok(userExists);
 });
+
 
 app.MapPost("/api/user/create", async (SpaceBookDbContext db, User user) =>
 {
