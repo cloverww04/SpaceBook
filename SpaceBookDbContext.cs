@@ -11,6 +11,7 @@ namespace SpaceBook
         public DbSet<SpaceObjectContent>? SpaceObjectsContent { get; set; }
         public DbSet<UserGeneratedSpaceContent>? UsersGeneratedSpaceContent { get; set; }
         public DbSet<Comment>? Comments { get; set; }
+        public DbSet<ContentType>? ContentTypes { get; set; }
 
         public SpaceBookDbContext(DbContextOptions<SpaceBookDbContext> context) : base(context) { }
 
@@ -32,7 +33,7 @@ namespace SpaceBook
                 ContentId = 1,
                 Title = "User-Generated Content 1",
                 Description = "Description of user-generated content 1",
-                Type = ContentType.SpaceFact,
+                TypeId = 2,
                 UserId = 1
             });
 
@@ -41,9 +42,13 @@ namespace SpaceBook
                 ContentId = 2,
                 Title = "User-Generated Content 2",
                 Description = "Description of user-generated content 2",
-                Type = ContentType.SpaceMission,
+                TypeId = 1,
                 UserId = 2
             });
+
+            modelBuilder.Entity<ContentType>().HasData(new ContentType { Id = 1, Type = "Space Fact" });
+            modelBuilder.Entity<ContentType>().HasData(new ContentType { Id = 2, Type = "Space Mission" });
+            modelBuilder.Entity<ContentType>().HasData(new ContentType { Id = 3, Type = "Event" });
 
             modelBuilder.Entity<SpaceObjectContent>()
                 .HasOne(so => so.Content)

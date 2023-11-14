@@ -167,6 +167,9 @@ app.MapGet("/api/spacecontent", async (SpaceBookDbContext db) =>
 {
     var spaceContent = await db.UsersGeneratedSpaceContent
     .Include(sc => sc.AssociatedSpaceObjects)
+    .Include(sc => sc.SpaceObject)
+    .Include(sc => sc.User)
+    .Include(sc => sc.Type)
     .ToListAsync();
     if (spaceContent == null)
     {

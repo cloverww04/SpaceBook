@@ -1,14 +1,28 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
 namespace SpaceBook.Migrations
 {
-    public partial class initialCreate : Migration
+    public partial class InitialCreate : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "ContentTypes",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Type = table.Column<string>(type: "text", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ContentTypes", x => x.Id);
+                });
+
             migrationBuilder.CreateTable(
                 name: "SpaceObjects",
                 columns: table => new
@@ -47,18 +61,52 @@ namespace SpaceBook.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Title = table.Column<string>(type: "text", nullable: true),
                     Description = table.Column<string>(type: "text", nullable: true),
-                    Type = table.Column<int>(type: "integer", nullable: false),
-                    UserId = table.Column<int>(type: "integer", nullable: false)
+                    TypeId = table.Column<int>(type: "integer", nullable: false),
+                    UserId = table.Column<int>(type: "integer", nullable: false),
+                    CreatedOn = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
+                    SpaceObjectId = table.Column<int>(type: "integer", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_UsersGeneratedSpaceContent", x => x.ContentId);
+                    table.ForeignKey(
+                        name: "FK_UsersGeneratedSpaceContent_ContentTypes_TypeId",
+                        column: x => x.TypeId,
+                        principalTable: "ContentTypes",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_UsersGeneratedSpaceContent_SpaceObjects_SpaceObjectId",
+                        column: x => x.SpaceObjectId,
+                        principalTable: "SpaceObjects",
+                        principalColumn: "SpaceObjectId");
                     table.ForeignKey(
                         name: "FK_UsersGeneratedSpaceContent_Users_UserId",
                         column: x => x.UserId,
                         principalTable: "Users",
                         principalColumn: "UserId",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Comments",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    UserId = table.Column<int>(type: "integer", nullable: false),
+                    Content = table.Column<string>(type: "text", nullable: true),
+                    CreatedDate = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
+                    UserGeneratedSpaceContentContentId = table.Column<int>(type: "integer", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Comments", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Comments_UsersGeneratedSpaceContent_UserGeneratedSpaceConte~",
+                        column: x => x.UserGeneratedSpaceContentContentId,
+                        principalTable: "UsersGeneratedSpaceContent",
+                        principalColumn: "ContentId");
                 });
 
             migrationBuilder.CreateTable(
@@ -88,6 +136,16 @@ namespace SpaceBook.Migrations
                 });
 
             migrationBuilder.InsertData(
+                table: "ContentTypes",
+                columns: new[] { "Id", "Type" },
+                values: new object[,]
+                {
+                    { 1, "Space Fact" },
+                    { 2, "Space Mission" },
+                    { 3, "Event" }
+                });
+
+            migrationBuilder.InsertData(
                 table: "SpaceObjects",
                 columns: new[] { "SpaceObjectId", "Description", "ImageUrl", "Name" },
                 values: new object[,]
@@ -107,11 +165,11 @@ namespace SpaceBook.Migrations
 
             migrationBuilder.InsertData(
                 table: "UsersGeneratedSpaceContent",
-                columns: new[] { "ContentId", "Description", "Title", "Type", "UserId" },
+                columns: new[] { "ContentId", "CreatedOn", "Description", "SpaceObjectId", "Title", "TypeId", "UserId" },
                 values: new object[,]
                 {
-                    { 1, "Description of user-generated content 1", "User-Generated Content 1", 0, 1 },
-                    { 2, "Description of user-generated content 2", "User-Generated Content 2", 1, 2 }
+                    { 1, null, "Description of user-generated content 1", null, "User-Generated Content 1", 2, 1 },
+                    { 2, null, "Description of user-generated content 2", null, "User-Generated Content 2", 1, 2 }
                 });
 
             migrationBuilder.InsertData(
@@ -124,6 +182,11 @@ namespace SpaceBook.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_Comments_UserGeneratedSpaceContentContentId",
+                table: "Comments",
+                column: "UserGeneratedSpaceContentContentId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_SpaceObjectsContent_ContentId",
                 table: "SpaceObjectsContent",
                 column: "ContentId");
@@ -134,6 +197,17 @@ namespace SpaceBook.Migrations
                 column: "SpaceObjectId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_UsersGeneratedSpaceContent_SpaceObjectId",
+                table: "UsersGeneratedSpaceContent",
+                column: "SpaceObjectId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UsersGeneratedSpaceContent_TypeId",
+                table: "UsersGeneratedSpaceContent",
+                column: "TypeId",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_UsersGeneratedSpaceContent_UserId",
                 table: "UsersGeneratedSpaceContent",
                 column: "UserId");
@@ -142,13 +216,19 @@ namespace SpaceBook.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
+                name: "Comments");
+
+            migrationBuilder.DropTable(
                 name: "SpaceObjectsContent");
 
             migrationBuilder.DropTable(
-                name: "SpaceObjects");
+                name: "UsersGeneratedSpaceContent");
 
             migrationBuilder.DropTable(
-                name: "UsersGeneratedSpaceContent");
+                name: "ContentTypes");
+
+            migrationBuilder.DropTable(
+                name: "SpaceObjects");
 
             migrationBuilder.DropTable(
                 name: "Users");

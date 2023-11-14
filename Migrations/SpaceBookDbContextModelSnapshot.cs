@@ -49,6 +49,39 @@ namespace SpaceBook.Migrations
                     b.ToTable("Comments");
                 });
 
+            modelBuilder.Entity("SpaceBook.Models.ContentType", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Type")
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ContentTypes");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Type = "Space Fact"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Type = "Space Mission"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Type = "Event"
+                        });
+                });
+
             modelBuilder.Entity("SpaceBook.Models.SpaceObject", b =>
                 {
                     b.Property<int>("SpaceObjectId")
@@ -172,16 +205,24 @@ namespace SpaceBook.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("text");
 
+                    b.Property<int?>("SpaceObjectId")
+                        .HasColumnType("integer");
+
                     b.Property<string>("Title")
                         .HasColumnType("text");
 
-                    b.Property<int?>("Type")
+                    b.Property<int>("TypeId")
                         .HasColumnType("integer");
 
                     b.Property<int>("UserId")
                         .HasColumnType("integer");
 
                     b.HasKey("ContentId");
+
+                    b.HasIndex("SpaceObjectId");
+
+                    b.HasIndex("TypeId")
+                        .IsUnique();
 
                     b.HasIndex("UserId");
 
@@ -193,7 +234,7 @@ namespace SpaceBook.Migrations
                             ContentId = 1,
                             Description = "Description of user-generated content 1",
                             Title = "User-Generated Content 1",
-                            Type = 0,
+                            TypeId = 2,
                             UserId = 1
                         },
                         new
@@ -201,7 +242,7 @@ namespace SpaceBook.Migrations
                             ContentId = 2,
                             Description = "Description of user-generated content 2",
                             Title = "User-Generated Content 2",
-                            Type = 1,
+                            TypeId = 1,
                             UserId = 2
                         });
                 });
@@ -236,13 +277,32 @@ namespace SpaceBook.Migrations
 
             modelBuilder.Entity("SpaceBook.Models.UserGeneratedSpaceContent", b =>
                 {
+                    b.HasOne("SpaceBook.Models.SpaceObject", "SpaceObject")
+                        .WithMany()
+                        .HasForeignKey("SpaceObjectId");
+
+                    b.HasOne("SpaceBook.Models.ContentType", "Type")
+                        .WithOne("UserGeneratedSpaceContent")
+                        .HasForeignKey("SpaceBook.Models.UserGeneratedSpaceContent", "TypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("SpaceBook.Models.User", "User")
                         .WithMany("CreatedSpaceContent")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.Navigation("SpaceObject");
+
+                    b.Navigation("Type");
+
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("SpaceBook.Models.ContentType", b =>
+                {
+                    b.Navigation("UserGeneratedSpaceContent");
                 });
 
             modelBuilder.Entity("SpaceBook.Models.SpaceObject", b =>
