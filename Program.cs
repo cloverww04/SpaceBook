@@ -86,6 +86,52 @@ app.MapGet("/api/checkuser/{uid}", (SpaceBookDbContext db, string uid) =>
     return Results.Ok(userExists);
 });
 
+app.MapPost("/api/user/create", async (SpaceBookDbContext db, User user) =>
+{
+    try
+    {
+        db.Users.Add(user);
+        await db.SaveChangesAsync();
+
+        return Results.Ok("User created successfully.");
+    }
+    catch (Exception ex)
+    {
+        return Results.BadRequest(ex);
+    }
+});
+
+app.MapPut("/api/user/update/{id}", async (SpaceBookDbContext db, int id, User user) =>
+{
+    var userToUpdate = await db.Users.FirstOrDefaultAsync(u => u.UserId == id);
+
+    if (userToUpdate == null)
+    {
+        return Results.NotFound();
+    }
+
+    userToUpdate.FirstName = user.FirstName;
+    userToUpdate.LastName = user.LastName;
+
+    await db.SaveChangesAsync();
+    return Results.Ok(userToUpdate);
+
+});
+
+app.MapDelete("/api/user/delete/{id}", async (SpaceBookDbContext db, int id) =>
+{
+    var userToDelete = await db.Users.FirstOrDefaultAsync(x => x.UserId == id);
+
+    if (userToDelete == null)
+    {
+        return Results.NotFound();
+    }
+
+    db.Remove(userToDelete);
+    await db.SaveChangesAsync();
+    return Results.Ok("Removed User");
+});
+
 
 // endpoints for SpaceObjects
 app.MapGet("/api/spaceobjects", async (SpaceBookDbContext db) =>
@@ -133,6 +179,7 @@ app.MapGet("/api/spacecontent/{id}", async (SpaceBookDbContext db, int id) =>
 {
     var spaceContent = await db.UsersGeneratedSpaceContent
     .Include(sc => sc.AssociatedSpaceObjects)
+    .Include(sc => sc.Comments)
     .FirstOrDefaultAsync(sc => sc.ContentId == id);
 
     if (spaceContent == null)
@@ -190,6 +237,52 @@ app.MapDelete("/api/spacecontent/delete/{id}", async (SpaceBookDbContext db, int
     db.Remove(deleteContent);
     await db.SaveChangesAsync();
     return Results.NoContent();
+});
+
+// endpoints for comments
+app.MapPost("/api/comment/create", async (SpaceBookDbContext db, Comment comment) =>
+{
+    try
+    {
+        db.Comments.Add(comment);
+        await db.SaveChangesAsync();
+
+        return Results.Ok("comment created successfully.");
+    }
+    catch (Exception ex)
+    {
+        return Results.BadRequest(ex);
+    }
+
+});
+
+app.MapPut("/api/comment/{id}", async (SpaceBookDbContext db, int id, Comment comment) =>
+{
+    var commentToUpdate = await db.Comments.FirstOrDefaultAsync(c => c.Id == id);
+
+    if (commentToUpdate == null)
+    {
+        return Results.NotFound();
+    }
+
+    commentToUpdate.Content = comment.Content;
+
+    await db.SaveChangesAsync();
+    return Results.Ok(commentToUpdate);
+});
+
+app.MapDelete("/api/comment/remove/{id}", async (SpaceBookDbContext db, int id) =>
+{
+    var commentToRemove = await db.Comments.FirstOrDefaultAsync(c => c.Id == id);
+
+    if (commentToRemove == null)
+    {
+        return Results.NotFound();
+    }
+
+    db.Remove(commentToRemove);
+    await db.SaveChangesAsync();
+    return Results.Ok("Comment deleted");
 });
 
 
