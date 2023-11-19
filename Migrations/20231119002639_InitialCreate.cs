@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
@@ -61,7 +60,7 @@ namespace SpaceBook.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Title = table.Column<string>(type: "text", nullable: true),
                     Description = table.Column<string>(type: "text", nullable: true),
-                    TypeId = table.Column<int>(type: "integer", nullable: false),
+                    TypeId = table.Column<int>(type: "integer", nullable: true),
                     UserId = table.Column<int>(type: "integer", nullable: false),
                     CreatedOn = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
                     SpaceObjectId = table.Column<int>(type: "integer", nullable: true)
@@ -205,7 +204,7 @@ namespace SpaceBook.Migrations
                 name: "IX_UsersGeneratedSpaceContent_TypeId",
                 table: "UsersGeneratedSpaceContent",
                 column: "TypeId",
-                unique: true);
+                unique: false);
 
             migrationBuilder.CreateIndex(
                 name: "IX_UsersGeneratedSpaceContent_UserId",

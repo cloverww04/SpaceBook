@@ -54,6 +54,12 @@ namespace SpaceBook
                 .HasOne(so => so.Content)
                 .WithMany(ugsc => ugsc.AssociatedSpaceObjects)
                 .HasForeignKey(so => so.ContentId);
+
+            modelBuilder.Entity<UserGeneratedSpaceContent>()
+                .HasOne(ugsc => ugsc.Type)
+                .WithMany()
+                .HasForeignKey(ugsc => ugsc.TypeId);
+
         }
 
     }

@@ -289,6 +289,19 @@ app.MapDelete("/api/comment/remove/{id}", async (SpaceBookDbContext db, int id) 
     return Results.Ok("Comment deleted");
 });
 
+// endpoints for content type
+app.MapGet("/api/type", async (SpaceBookDbContext db) =>
+{
+    var contentType = await db.ContentTypes.ToListAsync();
+
+    if (contentType == null)
+    {
+        return Results.NotFound();
+    }
+
+    return Results.Ok(contentType);
+});
+
 
 
 
