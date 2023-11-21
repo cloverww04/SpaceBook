@@ -15,7 +15,7 @@ namespace SpaceBook.Models
         public DateTime? CreatedOn { get; set; }
         public SpaceObject? SpaceObject { get; set; }
         // Add other properties, such as date created, comments, etc.
-        public List<SpaceObjectContent>? AssociatedSpaceObjects { get; set; } // Many -> Many relationship
+        public List<SpaceObjectContent>? SpaceObjectContents { get; set; }
         public List<Comment>? Comments { get; set; }
     }
 }

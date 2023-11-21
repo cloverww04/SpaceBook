@@ -12,8 +12,8 @@ using SpaceBook;
 namespace SpaceBook.Migrations
 {
     [DbContext(typeof(SpaceBookDbContext))]
-    [Migration("20231119002639_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20231121033540_initialCreate")]
+    partial class initialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -62,7 +62,12 @@ namespace SpaceBook.Migrations
                     b.Property<string>("Type")
                         .HasColumnType("text");
 
+                    b.Property<int?>("UserGeneratedSpaceContentContentId")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("UserGeneratedSpaceContentContentId");
 
                     b.ToTable("ContentTypes");
 
@@ -109,14 +114,20 @@ namespace SpaceBook.Migrations
                         new
                         {
                             SpaceObjectId = 1,
-                            Description = "A mysterious planet",
-                            Name = "Planet X"
+                            Description = "This is information related to planets",
+                            Name = "Planets"
                         },
                         new
                         {
                             SpaceObjectId = 2,
-                            Description = "A fast-moving comet",
-                            Name = "Comet Y"
+                            Description = "This is information related to stars",
+                            Name = "Stars"
+                        },
+                        new
+                        {
+                            SpaceObjectId = 3,
+                            Description = "This is information related to different galaxies",
+                            Name = "Galaxy"
                         });
                 });
 
@@ -207,7 +218,7 @@ namespace SpaceBook.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("text");
 
-                    b.Property<int?>("SpaceObjectId")
+                    b.Property<int>("SpaceObjectId")
                         .HasColumnType("integer");
 
                     b.Property<string>("Title")
@@ -223,8 +234,7 @@ namespace SpaceBook.Migrations
 
                     b.HasIndex("SpaceObjectId");
 
-                    b.HasIndex("TypeId")
-                        .IsUnique();
+                    b.HasIndex("TypeId");
 
                     b.HasIndex("UserId");
 
@@ -235,6 +245,7 @@ namespace SpaceBook.Migrations
                         {
                             ContentId = 1,
                             Description = "Description of user-generated content 1",
+                            SpaceObjectId = 1,
                             Title = "User-Generated Content 1",
                             TypeId = 2,
                             UserId = 1
@@ -243,6 +254,7 @@ namespace SpaceBook.Migrations
                         {
                             ContentId = 2,
                             Description = "Description of user-generated content 2",
+                            SpaceObjectId = 2,
                             Title = "User-Generated Content 2",
                             TypeId = 1,
                             UserId = 2
@@ -258,10 +270,19 @@ namespace SpaceBook.Migrations
                     b.Navigation("UserGeneratedSpaceContent");
                 });
 
+            modelBuilder.Entity("SpaceBook.Models.ContentType", b =>
+                {
+                    b.HasOne("SpaceBook.Models.UserGeneratedSpaceContent", "UserGeneratedSpaceContent")
+                        .WithMany()
+                        .HasForeignKey("UserGeneratedSpaceContentContentId");
+
+                    b.Navigation("UserGeneratedSpaceContent");
+                });
+
             modelBuilder.Entity("SpaceBook.Models.SpaceObjectContent", b =>
                 {
                     b.HasOne("SpaceBook.Models.UserGeneratedSpaceContent", "Content")
-                        .WithMany("AssociatedSpaceObjects")
+                        .WithMany("SpaceObjectContents")
                         .HasForeignKey("ContentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -281,11 +302,13 @@ namespace SpaceBook.Migrations
                 {
                     b.HasOne("SpaceBook.Models.SpaceObject", "SpaceObject")
                         .WithMany()
-                        .HasForeignKey("SpaceObjectId");
+                        .HasForeignKey("SpaceObjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("SpaceBook.Models.ContentType", "Type")
-                        .WithOne("UserGeneratedSpaceContent")
-                        .HasForeignKey("SpaceBook.Models.UserGeneratedSpaceContent", "TypeId")
+                        .WithMany()
+                        .HasForeignKey("TypeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -302,11 +325,6 @@ namespace SpaceBook.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("SpaceBook.Models.ContentType", b =>
-                {
-                    b.Navigation("UserGeneratedSpaceContent");
-                });
-
             modelBuilder.Entity("SpaceBook.Models.SpaceObject", b =>
                 {
                     b.Navigation("AssociatedSpaceContent");
@@ -319,9 +337,9 @@ namespace SpaceBook.Migrations
 
             modelBuilder.Entity("SpaceBook.Models.UserGeneratedSpaceContent", b =>
                 {
-                    b.Navigation("AssociatedSpaceObjects");
-
                     b.Navigation("Comments");
+
+                    b.Navigation("SpaceObjectContents");
                 });
 #pragma warning restore 612, 618
         }

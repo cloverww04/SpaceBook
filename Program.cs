@@ -166,8 +166,8 @@ app.MapGet("/api/spaceobject/{id}", async (SpaceBookDbContext db, int id) =>
 app.MapGet("/api/spacecontent", async (SpaceBookDbContext db) =>
 {
     var spaceContent = await db.UsersGeneratedSpaceContent
-    .Include(sc => sc.AssociatedSpaceObjects)
-    .Include(sc => sc.SpaceObject)
+    .Include(sc => sc.SpaceObjectContents)
+        .ThenInclude(sc => sc.SpaceObject)
     .Include(sc => sc.User)
     .Include(sc => sc.Type)
     .ToListAsync();
@@ -182,7 +182,10 @@ app.MapGet("/api/spacecontent", async (SpaceBookDbContext db) =>
 app.MapGet("/api/spacecontent/{id}", async (SpaceBookDbContext db, int id) =>
 {
     var spaceContent = await db.UsersGeneratedSpaceContent
-    .Include(sc => sc.AssociatedSpaceObjects)
+    .Include(sc => sc.SpaceObjectContents)
+        .ThenInclude(sc => sc.SpaceObject)
+    .Include(sc => sc.User)
+    .Include(sc => sc.Type)
     .Include(sc => sc.Comments)
     .FirstOrDefaultAsync(sc => sc.ContentId == id);
 
@@ -199,16 +202,18 @@ app.MapPost("/api/spacecontent/create", async (SpaceBookDbContext db, UserGenera
 {
     try
     {
+
         db.UsersGeneratedSpaceContent.Add(userGeneratedSpaceContent);
         await db.SaveChangesAsync();
 
-        return Results.Ok("UserGeneratedSpaceContent created successfully.");
+        return Results.Created($"/api/spaceconten/create/{userGeneratedSpaceContent.ContentId}", userGeneratedSpaceContent);
     }
     catch (Exception ex)
     {
         return Results.BadRequest(ex);
     }
 });
+
 
 app.MapPut("/api/spacecontent/update/{id}", async (SpaceBookDbContext db, int id, UserGeneratedSpaceContent spaceContent) =>
 {
@@ -222,7 +227,7 @@ app.MapPut("/api/spacecontent/update/{id}", async (SpaceBookDbContext db, int id
     contentToUpdate.Title = spaceContent.Title;
     contentToUpdate.Description = spaceContent.Description;
     contentToUpdate.Type = spaceContent.Type;
-    contentToUpdate.AssociatedSpaceObjects = spaceContent.AssociatedSpaceObjects;
+    contentToUpdate.SpaceObjectContents = spaceContent.SpaceObjectContents;
 
     await db.SaveChangesAsync();
     return Results.Ok(contentToUpdate);
@@ -300,6 +305,54 @@ app.MapGet("/api/type", async (SpaceBookDbContext db) =>
     }
 
     return Results.Ok(contentType);
+});
+
+
+// endpoints for spaceObjectContent
+
+app.MapPost("/api/spaceobjectcontent/create/{contentId}/{soId}", async (SpaceBookDbContext db, SpaceObjectContent soc, int contentId, int soId) =>
+{
+    try
+    {
+        soc.ContentId = contentId;
+        soc.SpaceObjectId = soId;
+
+
+        db.SpaceObjectsContent.Add(soc);
+        await db.SaveChangesAsync();
+
+        return Results.Created($"/api/spaceobjectcontent/create/{soc.SpaceObjectContentId}", soc);
+
+    }
+    catch (Exception ex)
+    {
+        return Results.BadRequest(ex.Message);
+    }
+});
+
+
+app.MapPut("/api/spaceobjectcontent/update/{contentId}/{soId}", async (SpaceBookDbContext db, int contentId, int soId, SpaceObjectContent updatedSpaceObjectContent) =>
+{
+    try
+    {
+
+        var spaceObjectContent = await db.SpaceObjectsContent
+        .SingleOrDefaultAsync(soc => soc.ContentId == contentId && soc.SpaceObjectId == soId);
+        if (spaceObjectContent == null)
+        {
+            return Results.NotFound();
+        }
+
+        spaceObjectContent.SpaceObjectId = updatedSpaceObjectContent.SpaceObjectId;
+
+        await db.SaveChangesAsync();
+
+        return Results.Ok("SpaceObjectContent updated successfully.");
+    }
+    catch (Exception ex)
+    {
+        return Results.BadRequest(ex.Message);
+    }
 });
 
 

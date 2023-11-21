@@ -112,14 +112,20 @@ namespace SpaceBook.Migrations
                         new
                         {
                             SpaceObjectId = 1,
-                            Description = "A mysterious planet",
-                            Name = "Planet X"
+                            Description = "This is information related to planets",
+                            Name = "Planets"
                         },
                         new
                         {
                             SpaceObjectId = 2,
-                            Description = "A fast-moving comet",
-                            Name = "Comet Y"
+                            Description = "This is information related to stars",
+                            Name = "Stars"
+                        },
+                        new
+                        {
+                            SpaceObjectId = 3,
+                            Description = "This is information related to different galaxies",
+                            Name = "Galaxy"
                         });
                 });
 
@@ -272,7 +278,7 @@ namespace SpaceBook.Migrations
             modelBuilder.Entity("SpaceBook.Models.SpaceObjectContent", b =>
                 {
                     b.HasOne("SpaceBook.Models.UserGeneratedSpaceContent", "Content")
-                        .WithMany("AssociatedSpaceObjects")
+                        .WithMany("SpaceObjectContents")
                         .HasForeignKey("ContentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -325,9 +331,9 @@ namespace SpaceBook.Migrations
 
             modelBuilder.Entity("SpaceBook.Models.UserGeneratedSpaceContent", b =>
                 {
-                    b.Navigation("AssociatedSpaceObjects");
-
                     b.Navigation("Comments");
+
+                    b.Navigation("SpaceObjectContents");
                 });
 #pragma warning restore 612, 618
         }

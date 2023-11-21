@@ -22,8 +22,9 @@ namespace SpaceBook
             modelBuilder.Entity<User>().HasData(new User { UserId = 1, FirstName = "Nathan", LastName = "Clover" });
             modelBuilder.Entity<User>().HasData(new User { UserId = 2, FirstName = "Bob", LastName = "Johnson" });
 
-            modelBuilder.Entity<SpaceObject>().HasData(new SpaceObject { SpaceObjectId = 1, Name = "Planet X", Description = "A mysterious planet" });
-            modelBuilder.Entity<SpaceObject>().HasData(new SpaceObject { SpaceObjectId = 2, Name = "Comet Y", Description = "A fast-moving comet" });
+            modelBuilder.Entity<SpaceObject>().HasData(new SpaceObject { SpaceObjectId = 1, Name = "Planets", Description = "This is information related to planets" });
+            modelBuilder.Entity<SpaceObject>().HasData(new SpaceObject { SpaceObjectId = 2, Name = "Stars", Description = "This is information related to stars" });
+            modelBuilder.Entity<SpaceObject>().HasData(new SpaceObject { SpaceObjectId = 3, Name = "Galaxy", Description = "This is information related to different galaxies" });
 
             modelBuilder.Entity<SpaceObjectContent>().HasData(new SpaceObjectContent { SpaceObjectContentId = 1, SpaceObjectId = 1, ContentId = 1 });
             modelBuilder.Entity<SpaceObjectContent>().HasData(new SpaceObjectContent { SpaceObjectContentId = 2, SpaceObjectId = 2, ContentId = 2 });
@@ -34,7 +35,7 @@ namespace SpaceBook
                 Title = "User-Generated Content 1",
                 Description = "Description of user-generated content 1",
                 TypeId = 2,
-                UserId = 1
+                UserId = 1,
             });
 
             modelBuilder.Entity<UserGeneratedSpaceContent>().HasData(new UserGeneratedSpaceContent
@@ -43,7 +44,7 @@ namespace SpaceBook
                 Title = "User-Generated Content 2",
                 Description = "Description of user-generated content 2",
                 TypeId = 1,
-                UserId = 2
+                UserId = 2,
             });
 
             modelBuilder.Entity<ContentType>().HasData(new ContentType { Id = 1, Type = "Space Fact" });
@@ -52,7 +53,7 @@ namespace SpaceBook
 
             modelBuilder.Entity<SpaceObjectContent>()
                 .HasOne(so => so.Content)
-                .WithMany(ugsc => ugsc.AssociatedSpaceObjects)
+                .WithMany(ugsc => ugsc.SpaceObjectContents)
                 .HasForeignKey(so => so.ContentId);
 
             modelBuilder.Entity<UserGeneratedSpaceContent>()
