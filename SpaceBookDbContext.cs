@@ -61,6 +61,13 @@ namespace SpaceBook
                 .WithMany()
                 .HasForeignKey(ugsc => ugsc.TypeId);
 
+            modelBuilder.Entity<Comment>()
+                .HasOne(c => c.UserGeneratedSpaceContent)
+                .WithMany(ugsc => ugsc.Comments)
+                .HasForeignKey(c => c.UserGeneratedSpaceContentId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+
         }
 
     }

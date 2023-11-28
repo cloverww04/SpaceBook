@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SpaceBook;
@@ -11,9 +12,10 @@ using SpaceBook;
 namespace SpaceBook.Migrations
 {
     [DbContext(typeof(SpaceBookDbContext))]
-    partial class SpaceBookDbContextModelSnapshot : ModelSnapshot
+    [Migration("20231128015119_deletePostWithComments")]
+    partial class deletePostWithComments
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
